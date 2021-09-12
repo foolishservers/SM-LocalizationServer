@@ -38,7 +38,7 @@ public void OnPluginStart() {
 	}
 	
 	g_StmtGetLocalizedString = SQL_PrepareQuery(g_LanguageDatabase,
-			"SELECT string FROM localizations WHERE token = ? AND language = ?",
+			"SELECT `string` FROM (SELECT `string`, `token` FROM `localizations` WHERE `language` = ?) WHERE `token` = ? COLLATE NOCASE;",
 			error, sizeof(error));
 	
 	if (g_StmtGetLocalizedString == null) {
@@ -258,8 +258,8 @@ bool Internal_ResolveLocalizedString(int language, const char[] token, char[] bu
 	char languageName[MAX_LANGUAGE_NAME_LENGTH];
 	GetLanguageInfo(language, _, _, languageName, sizeof(languageName));
 	
-	g_StmtGetLocalizedString.BindString(0, token, true);
-	g_StmtGetLocalizedString.BindString(1, languageName, true);
+	g_StmtGetLocalizedString.BindString(1, token, true);
+	g_StmtGetLocalizedString.BindString(0, languageName, true);
 	
 	// apparently prepared statements can't be threaded yet!
 	SQL_Execute(g_StmtGetLocalizedString);
